@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Me To You Designs — Shop Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--rose:#c9829a;--rose2:#d995a9;--deep:#704554;--ink:#4c3b42;--pale:#fff7fa;--line:#ead7de;--card:#fff;--muted:#88757d;--shadow:0 12px 35px rgba(112,69,84,.09)}
+*{box-sizing:border-box}body{margin:0;background:var(--pale);color:var(--ink);font-family:Arial,Helvetica,sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}
+.app{display:grid;grid-template-columns:245px 1fr;min-height:100vh}.side{background:#fff;border-right:1px solid var(--line);padding:20px;position:sticky;top:0;height:100vh}.brand{display:flex;align-items:center;gap:10px;margin-bottom:25px}.brand img{width:58px;height:58px;object-fit:contain;border-radius:50%}.brand b{font-family:Georgia,serif;font-size:20px;color:var(--deep)}
+.navbtn{display:flex;width:100%;border:0;background:none;padding:12px 10px;border-radius:10px;color:var(--deep);text-align:left;margin:3px 0}.navbtn.active,.navbtn:hover{background:#f8e9ee}.signout{margin-top:25px;width:100%}
+.main{padding:24px;max-width:1400px;width:100%;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:20px}.top h1{font:400 36px Georgia,serif;color:var(--deep);margin:0}.muted{color:var(--muted);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:22px;margin-bottom:18px}.card h2{font:400 25px Georgia,serif;color:var(--deep);margin:0 0 14px}.card h3{font:600 17px Georgia,serif;color:var(--deep);margin:20px 0 10px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+label{display:block;font-size:12px;font-weight:700;color:var(--deep);margin:10px 0 6px}input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px;background:#fff;color:var(--ink);outline:none}textarea{min-height:115px;resize:vertical}
+.btn{border:0;border-radius:10px;padding:11px 16px;background:var(--rose);color:#fff;font-weight:700}.btn.secondary{background:#f5e8ed;color:var(--deep)}.btn.danger{background:#a9536c}.btn.small{padding:8px 11px;font-size:12px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.right{margin-left:auto}.pill{display:inline-flex;padding:5px 9px;border-radius:999px;background:#f5e8ed;color:var(--deep);font-size:11px;font-weight:700}
+.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px 8px;border-bottom:1px solid var(--line);vertical-align:top;font-size:13px}th{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.thumb{width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}.empty{padding:45px;text-align:center;color:var(--muted)}
+.sectionbar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:15px}
+.optionbox,.variantbox,.mediaitem,.choice{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fffafa;margin:10px 0}
+.optionhead,.mediahead{display:flex;justify-content:space-between;gap:10px;align-items:center}.value-row{display:grid;grid-template-columns:1fr auto;gap:8px;margin:7px 0}.variant-grid{display:grid;grid-template-columns:1.4fr .7fr .8fr;gap:10px;align-items:end}
+.checks{display:flex;gap:18px;flex-wrap:wrap;margin:12px 0}.check{display:flex;gap:7px;align-items:center;font-size:13px}.check input{width:auto}
+.dropzone{border:1.5px dashed #d6a9b8;border-radius:14px;padding:22px;text-align:center;background:#fff8fa}.gallery{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:12px}.gallery .mediaitem{margin:0;padding:8px}.gallery img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}
+.notice{padding:12px;border-radius:10px;background:#fff1f5;border:1px solid var(--line);margin-bottom:14px;font-size:13px}.notice.error{background:#fff0f2;color:#9a405a}
+.login{max-width:430px;margin:10vh auto}.hidden{display:none!important}
+@media(max-width:900px){.app{grid-template-columns:1fr}.side{height:auto;position:static;border-right:0;border-bottom:1px solid var(--line)}.navrow{display:flex;gap:6px;overflow:auto}.navbtn{white-space:nowrap;width:auto}.main{padding:15px}.grid,.grid3,.grid4{grid-template-columns:1fr}.gallery{grid-template-columns:repeat(3,1fr)}.top h1{font-size:28px}.right{margin-left:0}}
+</style>
+</head>
+<body>
+<div id="login" class="card login">
+  <div class="brand"><img src="logo.PNG" alt=""><div><b>Me To You Designs</b><div class="muted">Shop Admin</div></div></div>
+  <div id="loginMsg" class="notice hidden"></div>
+  <label>Email</label><input id="loginEmail" type="email" value="metoyoudesigns@outlook.com">
+  <label>Password</label><input id="loginPassword" type="password">
+  <button class="btn" id="loginBtn" style="width:100%;margin-top:14px">Sign in</button>
+  <p class="muted">Your shop data is stored in Supabase. Never put a secret/service key in this page.</p>
+</div>
+
+<div id="shell" class="app hidden">
+<aside class="side">
+  <div class="brand"><img src="logo.PNG" alt=""><div><b>Me To You</b><div class="muted">Shop Admin</div></div></div>
+  <div class="navrow">
+    <button class="navbtn active" data-view="dashboard">Dashboard</button>
+    <button class="navbtn" data-view="products">Products</button>
+    <button class="navbtn" data-view="categories">Categories</button>
+    <button class="navbtn" data-view="orders">Orders</button>
+    <button class="navbtn" data-view="delivery">Delivery</button>
+    <button class="navbtn" data-view="settings">Settings</button>
+  </div>
+  <button class="navbtn signout" id="logout">Sign out</button>
+</aside>
+
+<main class="main">
+<section id="dashboard" class="view">
+  <div class="top"><div><h1>Dashboard</h1><div class="muted">Your Me To You Designs shop control centre.</div></div><button class="btn" onclick="showView('products');newProduct()">+ Add product</button></div>
+  <div class="grid3">
+    <div class="card"><div class="muted">Products</div><h2 id="statProducts">0</h2></div>
+    <div class="card"><div class="muted">Categories</div><h2 id="statCategories">0</h2></div>
+    <div class="card"><div class="muted">Best sellers</div><h2 id="statBest">0</h2></div>
+  </div>
+  <div class="card"><h2>How your shop works</h2><p class="muted">Add products here once. The customer website will later read the same Supabase catalogue, categories, variants, personalisation and delivery data automatically.</p></div>
+</section>
+
+<section id="products" class="view hidden">
+  <div class="top"><div><h1>Products</h1><div class="muted">Your central product catalogue.</div></div><button class="btn" onclick="newProduct()">+ Add product</button></div>
+  <div id="productNotice" class="notice hidden"></div>
+  <div id="productListCard" class="card">
+    <div class="toolbar"><input id="productSearch" placeholder="Search products..." style="max-width:350px"><select id="productFilter" style="max-width:220px"><option value="">All categories</option></select><button class="btn secondary" onclick="loadProducts()">Refresh</button></div>
+    <div class="tablewrap" style="margin-top:15px"><table><thead><tr><th>Image</th><th>Product</th><th>Category</th><th>Price</th><th>Delivery weight</th><th>Status</th><th></th></tr></thead><tbody id="productBody"></tbody></table></div>
+  </div>
+
+  <div id="productEditor" class="card hidden">
+    <div class="sectionbar"><div><h2 id="editorTitle">Add product</h2><div class="muted">Everything below is saved with this product in Supabase.</div></div><button class="btn secondary" onclick="closeEditor()">Back to products</button></div>
+    <input type="hidden" id="productId">
+
+    <h3>1. Product information</h3>
+    <div class="grid">
+      <div><label>Product name *</label><input id="pName" placeholder="Personalised Children's Pyjamas"></div>
+      <div><label>Category *</label><select id="pCategory"></select></div>
+    </div>
+    <div class="grid">
+      <div><label>Subcategory</label><select id="pSubcategory"><option value="">None</option></select></div>
+      <div><label>SKU (optional)</label><input id="pSku"></div>
+    </div>
+    <label>Short description</label><input id="pShort">
+    <label>Full product description</label><textarea id="pDescription"></textarea>
+    <label>Search tags <span class="muted">(comma separated)</span></label><input id="pTags" placeholder="personalised, pyjamas, Bluey, children's">
+
+    <h3>2. Product images</h3>
+    <div class="dropzone"><strong>Upload product images</strong><br><span class="muted">Upload one or several images. The first image is used as the main image.</span><br><input id="pImages" type="file" accept="image/*" multiple style="margin-top:10px"></div>
+    <div id="gallery" class="gallery"></div>
+
+    <h3>3. Price</h3>
+    <div class="grid3">
+      <div><label>Base price customers see (£) *</label><input id="pPrice" type="number" min="0" step="0.01" placeholder="15.00"></div>
+      <div><label>Compare-at price (£) <span class="muted">optional</span></label><input id="pCompare" type="number" min="0" step="0.01"></div>
+      <div><label>Price label</label><input id="pPriceLabel" placeholder="From £15"></div>
+    </div>
+
+    <h3>4. Custom options & variants</h3>
+    <p class="muted">Each product can have completely different options. Examples: Size, Colour, Design, Frame, Finish, Style. You can add your own names and values.</p>
+    <div id="options"></div>
+    <button class="btn secondary small" onclick="addOption()">+ Add option</button>
+    <div class="toolbar" style="margin-top:12px"><button class="btn secondary" onclick="generateVariants()">Generate variants from options</button><span class="muted">You can then edit each variant's price.</span></div>
+    <div id="variants"></div>
+
+    <h3>5. Personalisation</h3>
+    <div class="checks">
+      <label class="check"><input id="persEnabled" type="checkbox"> Personalisation available</label>
+      <label class="check"><input id="persText" type="checkbox"> Customer can enter text/name</label>
+      <label class="check"><input id="persImage" type="checkbox"> Customer can upload an image</label>
+      <label class="check"><input id="persRequired" type="checkbox"> Personalisation is required</label>
+    </div>
+    <div class="grid">
+      <div><label>Personalisation instructions</label><textarea id="persInstructions" placeholder="Tell us the name, wording or photo you would like us to use."></textarea></div>
+      <div><label>Image upload instructions</label><textarea id="persImageInstructions" placeholder="Please upload a clear photo..."></textarea></div>
+    </div>
+
+    <h3>6. Parcel & delivery information</h3>
+    <div class="grid4">
+      <div><label>Weight (g)</label><input id="shipWeight" type="number" min="0" placeholder="250"></div>
+      <div><label>Length (cm)</label><input id="shipLength" type="number" min="0" step="0.1"></div>
+      <div><label>Width (cm)</label><input id="shipWidth" type="number" min="0" step="0.1"></div>
+      <div><label>Height (cm)</label><input id="shipHeight" type="number" min="0" step="0.1"></div>
+    </div>
+    <div class="grid">
+      <div><label>Delivery profile</label><select id="shipProfile"></select></div>
+      <div><label>Parcel type</label><select id="shipType"><option>Large letter</option><option>Small parcel</option><option>Medium parcel</option><option>Large parcel</option><option>Custom</option></select></div>
+    </div>
+
+    <h3>7. Shop controls</h3>
+    <div class="checks">
+      <label class="check"><input id="isBest" type="checkbox"> Best seller</label>
+      <label class="check"><input id="isFeatured" type="checkbox"> Featured on homepage</label>
+      <label class="check"><input id="isActive" type="checkbox" checked> Visible in shop</label>
+    </div>
+
+    <h3>8. SEO</h3>
+    <label>SEO title</label><input id="seoTitle" placeholder="Personalised Children's Pyjamas | Me To You Designs">
+    <label>SEO description</label><textarea id="seoDescription"></textarea>
+    <label>SEO keywords</label><input id="seoKeywords">
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:24px"><button class="btn" onclick="saveProduct()">Save product</button><button class="btn secondary" onclick="closeEditor()">Cancel</button></div>
+  </div>
+</section>
+
+<section id="categories" class="view hidden">
+  <div class="top"><div><h1>Categories</h1><div class="muted">These are the categories the customer website will use.</div></div><button class="btn" onclick="newCategory()">+ Add category</button></div>
+  <div id="categoryNotice" class="notice hidden"></div>
+  <div class="card">
+    <div class="tablewrap"><table><thead><tr><th>Name</th><th>Parent</th><th>Slug</th><th>Order</th><th>Active</th><th></th></tr></thead><tbody id="categoryBody"></tbody></table></div>
+  </div>
+  <div id="categoryEditor" class="card hidden">
+    <h2>Add category</h2>
+    <div class="grid"><div><label>Name *</label><input id="cName"></div><div><label>Parent category</label><select id="cParent"><option value="">Main category</option></select></div></div>
+    <div class="grid"><div><label>Slug</label><input id="cSlug"></div><div><label>Sort order</label><input id="cOrder" type="number" value="0"></div></div>
+    <label>Description</label><textarea id="cDescription"></textarea>
+    <label class="check"><input id="cActive" type="checkbox" checked> Active</label>
+    <div style="margin-top:14px"><button class="btn" onclick="saveCategory()">Save category</button><button class="btn secondary" onclick="closeCategory()" style="margin-left:8px">Cancel</button></div>
+  </div>
+</section>
+
+<section id="orders" class="view hidden"><div class="top"><div><h1>Orders</h1><div class="muted">Ready for the customer order system to be connected.</div></div></div><div class="card"><div class="empty">Orders will appear here once checkout/order records are connected to Supabase.</div></div></section>
+
+<section id="delivery" class="view hidden">
+  <div class="top"><div><h1>Delivery & postage</h1><div class="muted">Create reusable delivery profiles. Products can select one of these profiles.</div></div><button class="btn" onclick="newDelivery()">+ Add delivery profile</button></div>
+  <div id="deliveryNotice" class="notice hidden"></div>
+  <div class="card"><div class="tablewrap"><table><thead><tr><th>Profile</th><th>Carrier</th><th>Weight up to</th><th>Price</th><th>Free over</th><th></th></tr></thead><tbody id="deliveryBody"></tbody></table></div></div>
+  <div id="deliveryEditor" class="card hidden">
+    <h2>Delivery profile</h2>
+    <div class="grid3"><div><label>Name *</label><input id="dName" placeholder="Royal Mail Small Parcel"></div><div><label>Carrier</label><input id="dCarrier" placeholder="Royal Mail"></div><div><label>Weight limit (g)</label><input id="dWeight" type="number"></div></div>
+    <div class="grid3"><div><label>Price (£)</label><input id="dPrice" type="number" step="0.01"></div><div><label>Free delivery over (£)</label><input id="dFree" type="number" step="0.01"></div><div><label>Active</label><select id="dActive"><option value="true">Yes</option><option value="false">No</option></select></div></div>
+    <button class="btn" onclick="saveDelivery()">Save</button><button class="btn secondary" onclick="closeDelivery()" style="margin-left:8px">Cancel</button>
+  </div>
+</section>
+
+<section id="settings" class="view hidden">
+  <div class="top"><div><h1>Settings</h1><div class="muted">Business details and shop-wide settings.</div></div></div>
+  <div class="card">
+    <div class="grid"><div><label>Business name</label><input id="sName" value="Me To You Designs"></div><div><label>Customer email</label><input id="sEmail" value="metoyoudesigns@outlook.com"></div></div>
+    <label>Footer / small print</label><textarea id="sFooter">Made with love • Designed around your idea • © 2026 Me To You Designs</textarea>
+    <label>Returns & refunds policy</label><textarea id="sReturns"></textarea>
+    <label>Delivery policy</label><textarea id="sDelivery"></textarea>
+    <label>Contact / enquiry text</label><textarea id="sContact"></textarea>
+    <button class="btn" onclick="saveSettings()">Save settings</button>
+    <div id="settingsNotice" class="notice hidden" style="margin-top:12px"></div>
+  </div>
+</section>
+</main></div>
+
+<script>
+const SUPABASE_URL="https://jbaepwsbuxevidjzvlhd.supabase.co";
+const SUPABASE_KEY="sb_publishable_YMXu3U0X8CuHMM80UvvqAg_59V0T-eL";
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let cats=[], products=[], deliveries=[], editingMedia=[];
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const slug=s=>String(s||"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+function notice(id,msg,error=false){$(id).textContent=msg;$(id).classList.remove("hidden");$(id).classList.toggle("error",error)}
+function hide(id){$(id).classList.add("hidden")}
+function showView(id){document.querySelectorAll(".view").forEach(x=>x.classList.add("hidden"));$(id).classList.remove("hidden");document.querySelectorAll(".navbtn[data-view]").forEach(x=>x.classList.toggle("active",x.dataset.view===id));if(id==="products")loadProducts();if(id==="categories")loadCategories();if(id==="delivery")loadDeliveries();}
+
+document.querySelectorAll(".navbtn[data-view]").forEach(b=>b.onclick=()=>showView(b.dataset.view));
+$("loginBtn").onclick=async()=>{hide("loginMsg");const {error}=await sb.auth.signInWithPassword({email:$("loginEmail").value.trim(),password:$("loginPassword").value});if(error)notice("loginMsg",error.message,true)};
+$("logout").onclick=()=>sb.auth.signOut();
+sb.auth.onAuthStateChange((_e,s)=>{if(s){$("login").classList.add("hidden");$("shell").classList.remove("hidden");refreshAll()}else{$("shell").classList.add("hidden");$("login").classList.remove("hidden")}});
+
+async function refreshAll(){await Promise.all([loadCategories(),loadProducts(),loadDeliveries(),loadSettings()])}
+
+async function loadCategories(){
+ const r=await sb.from("categories").select("*").order("sort_order").order("name"); if(r.error){notice("categoryNotice",r.error.message,true);return} cats=r.data||[];
+ $("statCategories").textContent=cats.length;
+ const main=cats.filter(c=>!c.parent_id);
+ $("pCategory").innerHTML='<option value="">Choose category</option>'+main.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");
+ $("pCategory").onchange=()=>fillSubcategories($("pCategory").value);
+ $("cParent").innerHTML='<option value="">Main category</option>'+main.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");
+ $("productFilter").innerHTML='<option value="">All categories</option>'+cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");
+ $("categoryBody").innerHTML=cats.map(c=>`<tr><td><strong>${esc(c.name)}</strong></td><td>${esc(cats.find(x=>x.id===c.parent_id)?.name||"Main category")}</td><td>${esc(c.slug)}</td><td>${c.sort_order}</td><td>${c.active?"Yes":"No"}</td><td><button class="btn danger small" onclick="deleteCategory('${c.id}')">Delete</button></td></tr>`).join("")||'<tr><td colspan="6" class="empty">No categories yet.</td></tr>';
+}
+function fillSubcategories(parent){$("pSubcategory").innerHTML='<option value="">None</option>'+cats.filter(c=>c.parent_id===parent).map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("")}
+function newCategory(){$("categoryEditor").classList.remove("hidden");["cName","cSlug","cDescription"].forEach(x=>$(x).value="");$("cOrder").value=0;$("cActive").checked=true}
+function closeCategory(){$("categoryEditor").classList.add("hidden")}
+$("cName").oninput=()=>{if(!$("cSlug").dataset.edited)$("cSlug").value=slug($("cName").value)}
+$("cSlug").oninput=()=>{$("cSlug").dataset.edited="1"}
+async function saveCategory(){
+ const name=$("cName").value.trim();if(!name){notice("categoryNotice","Category name is required.",true);return}
+ const {error}=await sb.from("categories").insert({name,slug:slug($("cSlug").value||name),parent_id:$("cParent").value||null,description:$("cDescription").value.trim(),sort_order:Number($("cOrder").value||0),active:$("cActive").checked});
+ if(error){notice("categoryNotice",error.message,true);return}notice("categoryNotice","Category saved.");closeCategory();loadCategories()
+}
+async function deleteCategory(id){if(!confirm("Delete this category? Products are not deleted."))return;const {error}=await sb.from("categories").delete().eq("id",id);if(error)notice("categoryNotice",error.message,true);else loadCategories()}
+
+async function loadProducts(){
+ const r=await sb.from("products").select("*,categories(name)").order("created_at",{ascending:false});if(r.error){notice("productNotice",r.error.message,true);return}products=r.data||[];
+ $("statProducts").textContent=products.length;$("statBest").textContent=products.filter(p=>p.is_best_seller).length;
+ renderProducts()
+}
+function renderProducts(){
+ const q=$("productSearch").value.toLowerCase(),f=$("productFilter").value;
+ const arr=products.filter(p=>(!q||(p.name+" "+(p.tags||[]).join(" ")+" "+(p.description||"")).toLowerCase().includes(q))&&(!f||p.category_id===f));
+ $("productBody").innerHTML=arr.map(p=>`<tr><td>${p.image_url?`<img class="thumb" src="${esc(p.image_url)}">`:"—"}</td><td><strong>${esc(p.name)}</strong><br>${p.is_best_seller?'<span class="pill">Best seller</span>':""}</td><td>${esc(p.categories?.name||"—")}</td><td>£${Number(p.price||0).toFixed(2)}${p.price_label?`<br><span class="muted">${esc(p.price_label)}</span>`:""}</td><td>${p.shipping?.weight_g?esc(p.shipping.weight_g)+"g":"—"}</td><td>${p.active?"Visible":"Hidden"}</td><td><button class="btn secondary small" onclick="editProduct('${p.id}')">Edit</button></td></tr>`).join("")||'<tr><td colspan="7" class="empty">No products found.</td></tr>'
+}
+$("productSearch").oninput=renderProducts;$("productFilter").onchange=renderProducts;
+
+function newProduct(){
+ $("productEditor").classList.remove("hidden");$("productListCard").classList.add("hidden");$("editorTitle").textContent="Add product";$("productId").value="";
+ ["pName","pSku","pShort","pDescription","pTags","pPrice","pCompare","pPriceLabel","seoTitle","seoDescription","seoKeywords","persInstructions","persImageInstructions","shipWeight","shipLength","shipWidth","shipHeight"].forEach(x=>$(x).value="");
+ $("pCategory").value="";fillSubcategories("");$("pSubcategory").value="";$("shipProfile").value="";$("shipType").value="Small parcel";
+ $("isBest").checked=false;$("isFeatured").checked=false;$("isActive").checked=true;$("persEnabled").checked=false;$("persText").checked=false;$("persImage").checked=false;$("persRequired").checked=false;
+ $("options").innerHTML="";$("variants").innerHTML="";editingMedia=[];renderGallery();$("pImages").value="";window.scrollTo({top:0,behavior:"smooth"})
+}
+function closeEditor(){$("productEditor").classList.add("hidden");$("productListCard").classList.remove("hidden")}
+async function editProduct(id){
+ const p=products.find(x=>x.id===id);if(!p)return;newProduct();$("editorTitle").textContent="Edit product";$("productId").value=p.id;
+ $("pName").value=p.name||"";$("pCategory").value=p.category_id||"";fillSubcategories(p.category_id||"");$("pSubcategory").value=p.subcategory_id||"";
+ $("pSku").value=p.sku||"";$("pShort").value=p.short_description||"";$("pDescription").value=p.description||"";$("pTags").value=(p.tags||[]).join(", ");
+ $("pPrice").value=p.price??0;$("pCompare").value=p.compare_at_price??"";$("pPriceLabel").value=p.price_label||"";
+ const per=p.personalization||{};$("persEnabled").checked=!!per.enabled;$("persText").checked=!!per.text;$("persImage").checked=!!per.image;$("persRequired").checked=!!per.required;$("persInstructions").value=per.instructions||"";$("persImageInstructions").value=per.image_instructions||"";
+ const sh=p.shipping||{};$("shipWeight").value=sh.weight_g??"";$("shipLength").value=sh.length_cm??"";$("shipWidth").value=sh.width_cm??"";$("shipHeight").value=sh.height_cm??"";$("shipProfile").value=sh.profile_id||"";$("shipType").value=sh.parcel_type||"Small parcel";
+ $("isBest").checked=!!p.is_best_seller;$("isFeatured").checked=!!p.is_featured;$("isActive").checked=!!p.active;
+ $("seoTitle").value=p.seo_title||"";$("seoDescription").value=p.seo_description||"";$("seoKeywords").value=p.seo_keywords||"";
+ editingMedia=Array.isArray(p.media)?p.media:[];renderGallery();renderOptions(p.options||[]);renderVariants(p.variants||[]);window.scrollTo({top:0,behavior:"smooth"})
+}
+$("pImages").onchange=()=>{for(const f of $("pImages").files)editingMedia.push({file:f,name:f.name,local:true});renderGallery()}
+function renderGallery(){$("gallery").innerHTML=editingMedia.map((m,i)=>`<div class="mediaitem"><img src="${m.local?URL.createObjectURL(m.file):esc(m.url)}"><div class="small">${i===0?"Main image":""}</div><button class="btn danger small" onclick="removeMedia(${i})">Remove</button></div>`).join("")}
+function removeMedia(i){editingMedia.splice(i,1);renderGallery()}
+
+function addOption(data={name:"",values:[]}){const box=document.createElement("div");box.className="optionbox";box.dataset.option="1";box.innerHTML=`<div class="optionhead"><input class="opt-name" placeholder="Option name e.g. Size, Colour, Frame, Design" value="${esc(data.name)}"><button class="btn danger small">Remove</button></div><div class="values"></div><button class="btn secondary small addval">+ Add value</button>`;box.querySelector(".btn.danger").onclick=()=>box.remove();box.querySelector(".addval").onclick=()=>addValue(box);$("options").appendChild(box);(data.values||[]).forEach(v=>addValue(box,v))}
+function addValue(box,val=""){const row=document.createElement("div");row.className="value-row";row.innerHTML=`<input class="opt-value" placeholder="Value e.g. Black, White, 2-3 years" value="${esc(val)}"><button class="btn secondary small">×</button>`;row.querySelector("button").onclick=()=>row.remove();box.querySelector(".values").appendChild(row)}
+function readOptions(){return [...document.querySelectorAll(".optionbox")].map(b=>({name:b.querySelector(".opt-name").value.trim(),values:[...b.querySelectorAll(".opt-value")].map(x=>x.value.trim()).filter(Boolean)})).filter(x=>x.name&&x.values.length)}
+function renderOptions(opts){$("options").innerHTML="";(opts||[]).forEach(o=>addOption(o))}
+function cartesian(arr){return arr.reduce((a,b)=>a.flatMap(x=>b.map(y=>[...x,y])),[[]])}
+function generateVariants(){
+ const opts=readOptions();if(!opts.length){notice("productNotice","Add at least one option with values first.",true);return}
+ const combos=cartesian(opts.map(o=>o.values));const old=readVariants();$("variants").innerHTML="";
+ combos.forEach(combo=>{const oldv=old.find(v=>JSON.stringify(v.selections)===JSON.stringify(Object.fromEntries(opts.map((o,i)=>[o.name,combo[i]]))));addVariant({selections:Object.fromEntries(opts.map((o,i)=>[o.name,combo[i]])),price:oldv?.price??Number($("pPrice").value||0),sku:oldv?.sku||""})})
+}
+function addVariant(v={selections:{},price:0,sku:""}){const box=document.createElement("div");box.className="variantbox";box.dataset.variant="1";const names=Object.entries(v.selections).map(([k,val])=>`${esc(k)}: ${esc(val)}`).join(" • ");box.innerHTML=`<div class="variant-grid"><div><strong>${names}</strong></div><div><label>Price (£)</label><input class="v-price" type="number" step="0.01" value="${Number(v.price||0).toFixed(2)}"></div><div><label>SKU</label><input class="v-sku" value="${esc(v.sku||"")}"></div></div>`;$("variants").appendChild(box)}
+function readVariants(){return [...document.querySelectorAll(".variantbox")].map(b=>({selections:{},price:Number(b.querySelector(".v-price").value||0),sku:b.querySelector(".v-sku").value.trim()}))}
+function renderVariants(v){$("variants").innerHTML="";(v||[]).forEach(addVariant)}
+
+async function uploadMedia(existingId){
+ const result=[];for(const m of editingMedia){if(m.local){const safe=m.file.name.toLowerCase().replace(/[^a-z0-9._-]/g,"-");const path=`products/${existingId}/${Date.now()}-${Math.random().toString(36).slice(2)}-${safe}`;const up=await sb.storage.from("product-images").upload(path,m.file);if(up.error)throw up.error;const pub=sb.storage.from("product-images").getPublicUrl(path).data.publicUrl;result.push({url:pub,name:m.file.name,path})}else result.push(m)}
+ return result
+}
+async function saveProduct(){
+ const name=$("pName").value.trim(),category=$("pCategory").value;if(!name||!category){notice("productNotice","Product name and category are required.",true);return}
+ const id=$("productId").value||crypto.randomUUID();const media=await uploadMedia(id);
+ const payload={id,name,slug:slug(name)+"-"+id.slice(0,8),category_id:category,subcategory_id:$("pSubcategory").value||null,sku:$("pSku").value.trim()||null,short_description:$("pShort").value.trim(),description:$("pDescription").value.trim(),price:Number($("pPrice").value||0),compare_at_price:$("pCompare").value?Number($("pCompare").value):null,price_label:$("pPriceLabel").value.trim()||null,tags:$("pTags").value.split(",").map(x=>x.trim()).filter(Boolean),media,image_url:media[0]?.url||null,options:readOptions(),variants:readVariants(),personalization:{enabled:$("persEnabled").checked,text:$("persText").checked,image:$("persImage").checked,required:$("persRequired").checked,instructions:$("persInstructions").value.trim(),image_instructions:$("persImageInstructions").value.trim()},shipping:{weight_g:Number($("shipWeight").value||0),length_cm:Number($("shipLength").value||0),width_cm:Number($("shipWidth").value||0),height_cm:Number($("shipHeight").value||0),profile_id:$("shipProfile").value||null,parcel_type:$("shipType").value},is_best_seller:$("isBest").checked,is_featured:$("isFeatured").checked,active:$("isActive").checked,seo_title:$("seoTitle").value.trim()||null,seo_description:$("seoDescription").value.trim()||null,seo_keywords:$("seoKeywords").value.trim()||null,updated_at:new Date().toISOString()};
+ const r=await sb.from("products").upsert(payload);if(r.error){notice("productNotice",r.error.message,true);return}notice("productNotice","Product saved successfully.");closeEditor();await loadProducts()
+}
+
+async function loadDeliveries(){const r=await sb.from("delivery_profiles").select("*").order("name");if(r.error){notice("deliveryNotice",r.error.message,true);return}deliveries=r.data||[];$("shipProfile").innerHTML='<option value="">No profile</option>'+deliveries.filter(d=>d.active).map(d=>`<option value="${d.id}">${esc(d.name)}</option>`).join("");$("deliveryBody").innerHTML=deliveries.map(d=>`<tr><td>${esc(d.name)}</td><td>${esc(d.carrier||"")}</td><td>${d.weight_limit_g?d.weight_limit_g+"g":"—"}</td><td>£${Number(d.price||0).toFixed(2)}</td><td>${d.free_over?("£"+Number(d.free_over).toFixed(2)):"—"}</td><td><button class="btn secondary small" onclick="editDelivery('${d.id}')">Edit</button></td></tr>`).join("")||'<tr><td colspan="6" class="empty">No delivery profiles yet.</td></tr>'}
+function newDelivery(){$("deliveryEditor").classList.remove("hidden");["dName","dCarrier","dWeight","dPrice","dFree"].forEach(x=>$(x).value="");$("dActive").value="true";$("deliveryEditor").dataset.id=""}
+function closeDelivery(){$("deliveryEditor").classList.add("hidden")}
+window.editDelivery=id=>{const d=deliveries.find(x=>x.id===id);if(!d)return;newDelivery();$("deliveryEditor").dataset.id=id;$("dName").value=d.name;$("dCarrier").value=d.carrier||"";$("dWeight").value=d.weight_limit_g||"";$("dPrice").value=d.price||0;$("dFree").value=d.free_over||"";$("dActive").value=String(d.active)}
+async function saveDelivery(){const id=$("deliveryEditor").dataset.id;const data={name:$("dName").value.trim(),carrier:$("dCarrier").value.trim(),weight_limit_g:Number($("dWeight").value||0),price:Number($("dPrice").value||0),free_over:$("dFree").value?Number($("dFree").value):null,active:$("dActive").value==="true"};if(!data.name){notice("deliveryNotice","Name is required.",true);return}const r=id?await sb.from("delivery_profiles").update(data).eq("id",id):await sb.from("delivery_profiles").insert(data);if(r.error)notice("deliveryNotice",r.error.message,true);else{notice("deliveryNotice","Delivery profile saved.");closeDelivery();loadDeliveries()}}
+
+async function loadSettings(){const r=await sb.from("site_settings").select("*");if(r.error)return;const m=Object.fromEntries((r.data||[]).map(x=>[x.key,x.value]));$("sName").value=m.business_name||"Me To You Designs";$("sEmail").value=m.contact_email||"metoyoudesigns@outlook.com";$("sFooter").value=m.footer||"Made with love • Designed around your idea • © 2026 Me To You Designs";$("sReturns").value=m.returns_policy||"";$("sDelivery").value=m.delivery_policy||"";$("sContact").value=m.contact_text||""}
+async function saveSettings(){const vals={business_name:$("sName").value,contact_email:$("sEmail").value,footer:$("sFooter").value,returns_policy:$("sReturns").value,delivery_policy:$("sDelivery").value,contact_text:$("sContact").value};for(const [key,value] of Object.entries(vals)){const r=await sb.from("site_settings").upsert({key,value:JSON.stringify(value),updated_at:new Date().toISOString()});if(r.error){notice("settingsNotice",r.error.message,true);return}}notice("settingsNotice","Settings saved.")}
+
+showView("dashboard");
+</script>
+</body>
+</html>
